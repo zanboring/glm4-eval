@@ -1,6 +1,8 @@
 # Python
 __pycache__/
 *.pyc
+.pytest_cache/
+.ipynb_checkpoints/
 
 # 数据库（SQLite 评测库，由 sql/load_to_sqlite.py 本地生成，不入库）
 *.db
