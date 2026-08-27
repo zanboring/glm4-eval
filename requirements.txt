@@ -1,0 +1,7 @@
+# GLM-4-Flash 评测套件依赖
+# 安装：pip install -r requirements.txt
+pandas>=2.0      # 数据加载/清洗/分组统计（notebook、SQLite 导入、看板）
+matplotlib>=3.7  # 评测图表生成（分学科准确率、合规率、错题分布）
+jupyter>=1.0     # Pandas 分析 notebook 运行环境
+pytest>=7.0      # extract_answer 答案提取单元测试
+streamlit>=1.30  # 统一交互式评测看板

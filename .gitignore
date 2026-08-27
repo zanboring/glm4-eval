@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# 数据库（SQLite 评测库，由 sql/load_to_sqlite.py 本地生成，不入库）
+*.db
+
+# 环境与密钥
+.env
+
+# 虚拟环境与 IDE
+venv/
+.idea/
