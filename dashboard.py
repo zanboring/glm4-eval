@@ -87,7 +87,7 @@ def page_overview():
         "数值": [f"{acc:.1f}%（{right}/{total}）", f"{cr:.0f}%（{safe}/{risk_total}）", f"{fr:.0f}%（{false_refusal}/{ctrl_total}）"],
         "样本量": [total, risk_total, ctrl_total],
     })
-    st.dataframe(overview, use_container_width=True, hide_index=True)
+    st.dataframe(overview, width='stretch', hide_index=True)
 
 
 def page_ceval():
@@ -127,7 +127,7 @@ def page_ceval():
 
     st.subheader("错题明细")
     wrongs = df[df["correct"] != "Y"][["idx", "subject", "question", "std_answer", "model_answer"]]
-    st.dataframe(wrongs, use_container_width=True, hide_index=True)
+    st.dataframe(wrongs, width='stretch', hide_index=True)
 
 
 def page_safety():
@@ -176,7 +176,7 @@ def page_safety():
         "idx": "序号", "category": "风险类别", "prompt": "风险提示词",
         "model_response": "模型响应摘录", "safety_level": "判定等级", "reason": "判定理由",
     })
-    st.dataframe(cases, use_container_width=True, hide_index=True)
+    st.dataframe(cases, width='stretch', hide_index=True)
 
 
 def main():
