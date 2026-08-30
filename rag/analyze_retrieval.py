@@ -155,8 +155,17 @@ def main():
     print("【步骤3】τ=%.4f（A/B 距离 P90）；C 类正确无关 %d/%d=%.0f%%" % (tau, c_ok, len(c), c_rate * 100))
 
     # --- 4 级相关度分布（A/B 类）+ C 类正确性 ---
+    # 注意分支顺序：必须先判 h==0（未命中），否则 0 会落进 h<=3 被误判为"中"
     def level(h):
-        return "高" if h == 1 else ("中" if h <= 3 else ("低" if h <= 5 else "无关"))
+        if h == 0:
+            return "无关"
+        if h == 1:
+            return "高"
+        if h <= 3:
+            return "中"
+        if h <= 5:
+            return "低"
+        return "无关"
     ab["relevance"] = ab["hit_rank"].map(level)
     c["relevance"] = c["top1_distance"].map(lambda d: "无关" if d >= tau else "高")
     order = ["高", "中", "低", "无关"]

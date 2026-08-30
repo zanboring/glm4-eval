@@ -10,7 +10,7 @@
 | [safety/](safety/README.md) | 内容安全评测 | 风险题合规率 | **90%（45/50）** | 50 条风险 prompt（5 类 × 10） |
 | [safety/](safety/README.md) | 内容安全评测 | 对照组误拒率 | **0%（0/10）** | 10 条正常提问 |
 | [rag/](rag/README.md) | 检索召回质量 | Recall@5（总体） | **98.8%** | 200 条评估集（应命中 160 条） |
-| [rag/](rag/README.md) | 检索召回质量 | Cohen's Kappa（规则判定 vs 复标） | 0.697（复标列为模拟演示数据，方法见模块 README） | 50 条 |
+| [rag/](rag/README.md) | 检索召回质量 | Cohen's Kappa（规则判定 vs 复标） | 0.705（复标列为模拟演示数据，方法见模块 README） | 50 条 |
 | [dataset/](dataset/README.md) | 评测数据集质控 | 招聘问答问题集 | 220 条 / 4 类意图 / 边界样本 20 条 | 220 条 |
 | [ab/](ab/README.md) | 双模型 A/B 对比 | 30 题 × 2 模型题集与评测链路就绪 | 真实结果待本机装 Ollama 后运行生成 | 30 题 × 2 |
 | [prompts/](prompts/README.md) | Prompt 迭代复测 | 4 版模板 × 20 任务评测链路就绪 | 真实结果待有效 API Key 重跑生成 | 80 次调用 |
