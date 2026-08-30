@@ -132,6 +132,62 @@ SELECT '内容安全(对照组)' AS 评测维度,
 FROM safety_results
 WHERE category = '正常提问';
 
+-- Q12: prompts 各版本合规率对比（任务2-1）
+-- 业务问题：Prompt 迭代四版模板的格式合规率变化，量化每次迭代的增益
+-- SQL 技巧：GROUP BY version 分组聚合，CASE WHEN 条件平均率
+SELECT version AS 模板版本,
+       COUNT(*) AS 样本量,
+       SUM(compliance) AS 合规数,
+       ROUND(100.0 * AVG(compliance), 1) AS 合规率,
+       SUM(CASE WHEN json_ok = 1 AND fields_missing IS NOT NULL AND fields_missing != '' THEN 1 ELSE 0 END) AS JSON通但字段不全
+FROM prompt_eval_results
+WHERE status != 'pending'
+GROUP BY version
+ORDER BY 合规率;
+
+-- Q13: ab 各模型四维度规则分均值（任务2-2）
+-- 业务问题：两模型在四个评估维度上的表现横向对比，为选型提供数据支撑
+-- SQL 技巧：GROUP BY model + CASE WHEN 取不同维度行，用 AVG 聚合；
+--           SQLite 可用 AVG(CASE ...) 一行出多列
+SELECT model AS 模型,
+       COUNT(*) AS 题数,
+       ROUND(AVG(rule_accuracy), 2) AS 准确性,
+       ROUND(AVG(rule_logic), 2)    AS 逻辑性,
+       ROUND(AVG(rule_fluency), 2)  AS 流畅性,
+       ROUND(AVG(rule_safety), 2)   AS 安全性,
+       ROUND(AVG(rule_accuracy + rule_logic + rule_fluency + rule_safety) / 4.0, 2) AS 四维均值
+FROM ab_results
+WHERE status = 'ok'
+GROUP BY model;
+
+-- Q14: dataset 意图分布 JOIN ab 意向下钻（任务2-3）
+-- 业务问题：A/B 意向下钻的表现可回溯到数据集的原始标注分布（样本越均衡，越可比）
+-- SQL 技巧：两表子查询后 INNER JOIN，实现"样本分布 × 评测表现"的关联视图
+-- 前置：ab_results.status = ok（真实结果已生成）
+WITH dist AS (
+    SELECT intent, COUNT(*) AS n_ds
+    FROM dataset_questions
+    GROUP BY intent
+), per AS (
+    SELECT intent,
+           AVG(CASE model WHEN 'glm' THEN rule_accuracy+rule_logic+rule_fluency+rule_safety END)/4.0 AS glm_avg,
+           AVG(CASE model WHEN 'qwen' THEN rule_accuracy+rule_logic+rule_fluency+rule_safety END)/4.0 AS qwen_avg
+    FROM ab_results
+    WHERE status = 'ok'
+    GROUP BY intent
+)
+SELECT d.intent AS 意图,
+       d.n_ds AS 数据集样本量,
+       ROUND(100.0 * d.n_ds / (SELECT COUNT(*) FROM dataset_questions), 1) AS 数据集占比,
+       ROUND(per.glm_avg, 2) AS GLM四维均值,
+       ROUND(per.qwen_avg, 2) AS Qwen四维均值,
+       CASE WHEN per.glm_avg > per.qwen_avg THEN 'GLM'
+            WHEN per.glm_avg < per.qwen_avg THEN 'Qwen'
+            ELSE '平手' END AS 规则分占优
+FROM dist d
+JOIN per USING (intent)
+ORDER BY d.n_ds DESC;
+
 -- Q10: 各学科题数与对错分布
 -- 业务问题：各学科题目数量与对错分布一览（用于核对样本均衡性）
 -- SQL 技巧：GROUP BY + 多列 CASE WHEN 聚合
