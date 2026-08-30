@@ -1,0 +1,3 @@
+﻿query_id,query,expected_doc_id,rank_1,hit_rank,ngram_coverage,attribution
+B015,运维工程师月薪范围多少呀？想确认一下？,doc_04,doc_05,0,0.667,embedding语义偏差
+B041,问一下哈，年假有多少天？,doc_11,doc_13,0,0.526,embedding语义偏差

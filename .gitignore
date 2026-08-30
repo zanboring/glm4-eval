@@ -7,6 +7,9 @@ __pycache__/
 # 数据库（SQLite 评测库，由 sql/load_to_sqlite.py 本地生成，不入库）
 *.db
 
+# ChromaDB 向量库（可重建产物，由 rag/build_kb.py 本地生成，不入库）
+chroma_db/
+
 # 环境与密钥
 .env
 
