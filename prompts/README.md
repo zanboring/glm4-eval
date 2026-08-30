@@ -47,7 +47,18 @@ python prompts/analyze_prompt_eval.py
 
 ## 结果速览
 
-见 `reports/prompt_iter_report.md`（需真实运行后生成）：各版本合规率对比表、分任务类型下钻、baseline→v4 典型改善 case 前后对照、迭代方法论结论。
+> 以下数字来自 `prompts/results/prompt_eval_results.csv`（80 条真实调用结果），命令：`python prompts/analyze_prompt_eval.py`。复算方式：`df.groupby('version')['compliance'].mean()`。
+
+| 版本 | 说明 | 总体合规率 | 信息抽取 | 意图分类 | 文本改写 |
+| --- | --- | --- | --- | --- | --- |
+| baseline | 朴素指令（对照组） | 0% | 0% | 0% | 0% |
+| v2_加背景 | 补充角色与业务背景 | 0% | 0% | 0% | 0% |
+| v3_加格式约束 | 只输出 JSON + 字段清单 | 100% | 100% | 100% | 100% |
+| v4_加边界约束 | 增加 null 兜底 / 格式 / 边界规则 | 100% | 100% | 100% | 100% |
+
+- **最大增益来自 v3（格式约束）**：从 0% 跃升到 100%，与 `reports/prompt_iter_report.md` 中"格式约束是合规率跃升的决定性一步"的自动归因一致；
+- v4 在合规率上已无提升空间，但在字段值层面：薪资格式化为 `[下限, 上限]` 数字数组、信息缺失字段填 `null` 等边界规则已生效，见报告"典型改善 case"；
+- 详细分类型下钻、baseline→v4 典型改善 case 前后对照、迭代方法论结论见 `reports/prompt_iter_report.md`。
 
 ## 方法论沉淀（可复用）
 
