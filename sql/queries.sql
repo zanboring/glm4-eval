@@ -143,3 +143,48 @@ SELECT subject AS 学科,
 FROM ceval_results
 GROUP BY subject
 ORDER BY 总题数 DESC, 准确率 DESC;
+
+-- Q11: 全模块样本量与关键指标总览（6 个模块一表总览，仓库"评测全景"入口）
+-- 业务问题：全部评测/数据模块的样本量与各自核心指标，一眼掌握套件覆盖面
+-- SQL 技巧：6 路 UNION ALL，各分支独立聚合，统一为 (模块, 样本量, 关键数, 关键率) 四列
+-- 前置条件：需先运行 sql/load_to_sqlite.py、sql/load_rag_to_sqlite.py、sql/load_extra_to_sqlite.py
+-- 指标口径：各模块"通过"含义不同，已在模块名中标注——准确率/合规率/Recall@5/
+--           边界样本占比（质控结构指标）/有效回答占比/格式合规率
+SELECT '通用能力评测(准确率)' AS module,
+       COUNT(*) AS n,
+       SUM(CASE WHEN correct = 'Y' THEN 1 ELSE 0 END) AS pass_n,
+       ROUND(100.0 * SUM(CASE WHEN correct = 'Y' THEN 1 ELSE 0 END) / COUNT(*), 1) AS pass_rate
+FROM ceval_results
+UNION ALL
+SELECT '内容安全-风险题(合规率)',
+       COUNT(*),
+       SUM(CASE WHEN safety_level = 'safe' THEN 1 ELSE 0 END),
+       ROUND(100.0 * SUM(CASE WHEN safety_level = 'safe' THEN 1 ELSE 0 END) / COUNT(*), 1)
+FROM safety_results
+WHERE category != '正常提问'
+UNION ALL
+SELECT '检索召回-A/B类(Recall@5)',
+       COUNT(*),
+       SUM(CASE WHEN r.hit_rank BETWEEN 1 AND 5 THEN 1 ELSE 0 END),
+       ROUND(100.0 * SUM(CASE WHEN r.hit_rank BETWEEN 1 AND 5 THEN 1.0 ELSE 0 END) / COUNT(*), 1)
+FROM rag_results r
+JOIN rag_queries q USING (query_id)
+WHERE q.expected_doc_id IS NOT NULL
+UNION ALL
+SELECT '招聘问答问题集(边界样本占比)',
+       COUNT(*),
+       SUM(CASE WHEN boundary_case = 'True' THEN 1 ELSE 0 END),
+       ROUND(100.0 * SUM(CASE WHEN boundary_case = 'True' THEN 1.0 ELSE 0 END) / COUNT(*), 1)
+FROM dataset_questions
+UNION ALL
+SELECT 'A/B对比评测(有效回答占比)',
+       COUNT(*),
+       SUM(CASE WHEN status = 'ok' AND answer NOT LIKE '__ERROR__:%' AND answer != '' THEN 1 ELSE 0 END),
+       ROUND(100.0 * SUM(CASE WHEN status = 'ok' AND answer NOT LIKE '__ERROR__:%' AND answer != '' THEN 1.0 ELSE 0 END) / COUNT(*), 1)
+FROM ab_results
+UNION ALL
+SELECT 'Prompt复测(格式合规率)',
+       COUNT(*),
+       SUM(CASE WHEN compliance = 1 THEN 1 ELSE 0 END),
+       ROUND(100.0 * SUM(CASE WHEN compliance = 1 THEN 1.0 ELSE 0 END) / COUNT(*), 1)
+FROM prompt_eval_results;

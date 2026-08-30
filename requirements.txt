@@ -1,7 +1,18 @@
 # GLM-4-Flash 评测套件依赖
 # 安装：pip install -r requirements.txt
-pandas>=2.0      # 数据加载/清洗/分组统计（notebook、SQLite 导入、看板）
-matplotlib>=3.7  # 评测图表生成（分学科准确率、合规率、错题分布）
+# 各模块可选依赖见下方"可选依赖"段（不装可选依赖不影响其余模块运行）
+pandas>=2.0      # 数据加载/清洗/分组统计（notebook、SQLite 导入、看板、各模块分析）
+matplotlib>=3.7  # 评测图表生成（分学科准确率、Recall@K、合规率、四维度对比等）
 jupyter>=1.0     # Pandas 分析 notebook 运行环境
-pytest>=7.0      # extract_answer 答案提取单元测试
+pytest>=7.0      # extract_answer / Kappa / Recall 单元测试
 streamlit>=1.30  # 统一交互式评测看板
+
+# ---- 可选依赖（按模块安装）----
+# ceval / safety / ab / prompts / gradio_app：调用 GLM-4-Flash 需 SDK（Python 3.8+）
+zhipuai>=2.0
+# rag：ChromaDB 向量库（build_kb.py 入库与检索；网络不可用时脚本自动切离线兜底方案）
+chromadb>=0.4
+# gradio_app：评测辅助页面
+gradio>=4.0
+# ab：本地 Qwen 推理走本机 Ollama HTTP 接口，无 Python 依赖；
+#     需安装 Ollama 并执行 ollama pull qwen2.5:1.5b（见 ab/README.md）
